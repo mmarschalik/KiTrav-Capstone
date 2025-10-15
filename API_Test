@@ -1,0 +1,16 @@
+#Backend (Node.js / Express OR Python Flask/FastAPI)
+#Handles API calls to AI models (TensorFlow.js, Hugging Face, OpenAI, etc.),
+#Talks to database (MongoDB, PostgreSQL, etc.),
+#Processes business logic (availability, pricing, user profile).
+#import OpenAI from "openai";
+
+#const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+#async function askAI() {
+#  const res = await openai.chat.completions.create({
+#    model: "gpt-4o-mini",
+#    messages: [{ role: "user", content: "Explain travel bias in recommendations." }]
+#  });
+#  console.log(res.choices[0].message.content);
+#}
+#askAI();
