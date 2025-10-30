@@ -1,5 +1,4 @@
 //API key: TO8OQp6Imv7MmaalAlR59wbrSiKdgSIa 
-//API Secret : jWU6hzEe7q4rgwFA
 //https://developers.amadeus.com/self-service
 // services/amadeusService.js
 const axios = require('axios');
