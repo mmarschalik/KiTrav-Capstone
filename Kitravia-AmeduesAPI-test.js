@@ -1,3 +1,6 @@
+//API key: TO8OQp6Imv7MmaalAlR59wbrSiKdgSIa 
+//API Secret : jWU6hzEe7q4rgwFA
+//https://developers.amadeus.com/self-service
 // services/amadeusService.js
 const axios = require('axios');
 
@@ -43,6 +46,7 @@ class AmadeusService {
     }
   }
 
+  //https://developers.amadeus.com/self-service/category/flights/api-doc/flight-offers-search
   // Search for flight offers
   async searchFlights(params) {
     try {
