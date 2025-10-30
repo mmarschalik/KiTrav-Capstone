@@ -5,6 +5,7 @@ const axios = require('axios');
 
 class AmadeusService {
   constructor() {
+    //from env file
     this.clientId = process.env.AMADEUS_CLIENT_ID;
     this.clientSecret = process.env.AMADEUS_CLIENT_SECRET;
     this.baseUrl = process.env.AMADEUS_ENV === 'production' 
