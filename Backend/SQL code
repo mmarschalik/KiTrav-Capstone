@@ -1,0 +1,240 @@
+-- ============================================================
+-- Kitravia PostgreSQL schema 
+-- ============================================================
+
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- ========================
+-- ENUM types
+-- ========================
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'booking_status') THEN
+    CREATE TYPE booking_status AS ENUM ('pending','confirmed','cancelled','failed','refunded');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_status') THEN
+    CREATE TYPE payment_status AS ENUM ('pending','authorized','captured','failed','refunded','voided');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
+    CREATE TYPE user_role AS ENUM ('customer','agent','admin','system');
+  END IF;
+END$$;
+
+-- ========================
+-- USERS & PROFILES
+-- ========================
+CREATE TABLE IF NOT EXISTS users (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  email text UNIQUE NOT NULL,
+  password_hash text,
+  role user_role NOT NULL DEFAULT 'customer',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS profiles (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES users(id) ON DELETE CASCADE,
+  full_name text,
+  phone text,
+  dob date,
+  passport jsonb,
+  preferences jsonb,
+  embedding double precision[], -- vector fallback
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+-- ========================
+-- PROVIDERS
+-- ========================
+CREATE TABLE IF NOT EXISTS providers (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  type text,
+  metadata jsonb,
+  created_at timestamptz DEFAULT now()
+);
+
+-- ========================
+-- FLIGHTS / HOTELS / CARS
+-- ========================
+CREATE TABLE IF NOT EXISTS flights (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id uuid REFERENCES providers(id) ON DELETE SET NULL,
+  origin text NOT NULL,
+  destination text NOT NULL,
+  departs_at timestamptz NOT NULL,
+  arrives_at timestamptz NOT NULL,
+  price_amount numeric(12,2),
+  price_currency char(3),
+  data jsonb,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS hotels (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id uuid REFERENCES providers(id),
+  name text NOT NULL,
+  city text,
+  stars smallint,
+  price_amount numeric(12,2),
+  price_currency char(3),
+  data jsonb,
+  embedding double precision[],
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS cars (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id uuid REFERENCES providers(id),
+  car_type text,
+  location jsonb,
+  price_amount numeric(12,2),
+  price_currency char(3),
+  data jsonb,
+  created_at timestamptz DEFAULT now()
+);
+
+-- ========================
+-- BOOKINGS
+-- ========================
+CREATE TABLE IF NOT EXISTS bookings (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES users(id),
+  reference text UNIQUE,
+  status booking_status DEFAULT 'pending',
+  total_amount numeric(12,2),
+  currency char(3),
+  paid boolean DEFAULT false,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS booking_items (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  booking_id uuid REFERENCES bookings(id) ON DELETE CASCADE,
+  item_type text,
+  item_ref uuid,
+  provider_data jsonb,
+  price_amount numeric(12,2),
+  currency char(3),
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  booking_id uuid REFERENCES bookings(id),
+  amount numeric(12,2),
+  currency char(3),
+  status payment_status DEFAULT 'pending',
+  raw_response jsonb,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+-- ========================
+-- AI / ITINERARY / RAG
+-- ========================
+CREATE TABLE IF NOT EXISTS ai_responses (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  model text,
+  prompt text,
+  response jsonb,
+  tokens_used int,
+  metadata jsonb,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS rag_documents (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  source_type text,
+  source_id uuid,
+  chunk_text text,
+  chunk_metadata jsonb,
+  embedding double precision[],
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS itineraries (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  booking_id uuid REFERENCES bookings(id),
+  user_id uuid REFERENCES users(id),
+  title text,
+  summary text,
+  detailed jsonb,
+  ai_response_id uuid REFERENCES ai_responses(id),
+  embedding double precision[],
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+-- ========================
+-- COSINE SIMILARITY HELPERS
+-- ========================
+CREATE OR REPLACE FUNCTION array_dot(a double precision[], b double precision[])
+RETURNS double precision
+LANGUAGE plpgsql IMMUTABLE AS $$
+DECLARE
+  i int; s double precision := 0; n int;
+BEGIN
+  IF a IS NULL OR b IS NULL THEN RETURN NULL; END IF;
+  n := LEAST(array_length(a,1), array_length(b,1));
+  FOR i IN 1..n LOOP s := s + (a[i] * b[i]); END LOOP;
+  RETURN s;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION array_norm(a double precision[])
+RETURNS double precision
+LANGUAGE plpgsql IMMUTABLE AS $$
+DECLARE i int; s double precision := 0;
+BEGIN
+  IF a IS NULL THEN RETURN NULL; END IF;
+  FOR i IN 1..array_length(a,1) LOOP s := s + (a[i]*a[i]); END LOOP;
+  RETURN sqrt(s);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION array_cosine_similarity(a double precision[], b double precision[])
+RETURNS double precision
+LANGUAGE sql IMMUTABLE AS $$
+SELECT CASE
+  WHEN a IS NULL OR b IS NULL THEN NULL
+  ELSE (array_dot(a,b) / (array_norm(a)*array_norm(b)))
+END;
+$$;
+
+-- ========================
+-- TRIGGER for updated_at
+-- ========================
+CREATE OR REPLACE FUNCTION trigger_set_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_users_updated BEFORE UPDATE ON users
+FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
+
+CREATE TRIGGER trg_bookings_updated BEFORE UPDATE ON bookings
+FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
+
+CREATE TRIGGER trg_itineraries_updated BEFORE UPDATE ON itineraries
+FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
+
+CREATE TRIGGER trg_payments_updated BEFORE UPDATE ON payments
+FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
+
+-- ========================
+-- SAMPLE QUERY
+-- ========================
+-- Example: find top 5 similar RAG docs to a query embedding
+-- SELECT id, chunk_text,
+--        array_cosine_similarity(embedding, ARRAY[0.1,0.2,0.3]::double precision[]) AS similarity
+-- FROM rag_documents
+-- ORDER BY similarity DESC
+-- LIMIT 5;
