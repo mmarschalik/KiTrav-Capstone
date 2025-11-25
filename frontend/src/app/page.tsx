@@ -1,13 +1,16 @@
 const features = [
   {
+    icon: "🧭",
     title: "Unified Search",
     copy: "Compare flights, stays, and activities in one stream of results.",
   },
   {
+    icon: "🧠",
     title: "Smart Bundles",
     copy: "Our AI pairs flights, hotels, and add-ons that actually fit together.",
   },
   {
+    icon: "⚡",
     title: "One-Tap Itinerary",
     copy: "Lock in the perfect plan and share it with your travel group instantly.",
   },
@@ -124,7 +127,12 @@ export default function Page() {
         <section className="mt-14 grid gap-6 md:grid-cols-3">
           {features.map((feature) => (
             <div key={feature.title} className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-lg">
-              <p className="text-sm uppercase tracking-[0.3em] text-white/40">Feature</p>
+              <div className="flex items-center gap-3 text-white">
+                <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-xl">
+                  {feature.icon}
+                </span>
+                <p className="text-xs uppercase tracking-[0.3em] text-white/50">Feature</p>
+              </div>
               <h3 className="mt-3 text-xl font-semibold text-white">{feature.title}</h3>
               <p className="mt-2 text-sm text-white/70">{feature.copy}</p>
               <div className="mt-6 h-1 w-16 rounded-full bg-gradient-to-r from-sky-400 to-emerald-400"></div>
