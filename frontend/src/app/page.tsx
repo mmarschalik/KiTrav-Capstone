@@ -1,3 +1,5 @@
+"use client";
+
 const features = [
   {
     icon: "🧭",
@@ -39,7 +41,7 @@ const mockCards = [
 
 export default function Page() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+    <main className="min-h-screen bg-linear-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
       <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 pb-16 pt-8 md:px-10 lg:px-12">
         <header className="flex items-center justify-between rounded-full border border-white/10 bg-white/5 px-5 py-3 backdrop-blur">
           <span className="text-lg font-semibold tracking-tight">KiTrav</span>
@@ -62,8 +64,8 @@ export default function Page() {
           </button>
         </header>
 
-        <section className="relative mt-12 grid gap-10 rounded-[32px] border border-white/10 bg-white/5 px-8 py-16 text-center backdrop-blur">
-          <div className="absolute -inset-px rounded-[32px] border border-white/5 blur-[1px]"></div>
+        <section className="relative mt-12 grid gap-10 rounded-4xl border border-white/10 bg-white/5 px-8 py-16 text-center backdrop-blur">
+          <div className="absolute -inset-px rounded-4xl border border-white/5 blur-[1px]"></div>
           <div className="relative mx-auto max-w-3xl space-y-6">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1 text-sm text-white/70">
               ✈️ Smarter travel planning
@@ -116,7 +118,7 @@ export default function Page() {
 
           <div className="relative flex flex-wrap justify-center gap-6 text-left text-white/70">
             {highlights.map((item) => (
-              <div key={item.label} className="min-w-[160px] rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-center">
+              <div key={item.label} className="min-w-40 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-center">
                 <p className="text-sm uppercase tracking-widest text-white/50">{item.label}</p>
                 <p className="mt-2 text-2xl font-semibold text-white">{item.value}</p>
               </div>
@@ -135,12 +137,12 @@ export default function Page() {
               </div>
               <h3 className="mt-3 text-xl font-semibold text-white">{feature.title}</h3>
               <p className="mt-2 text-sm text-white/70">{feature.copy}</p>
-              <div className="mt-6 h-1 w-16 rounded-full bg-gradient-to-r from-sky-400 to-emerald-400"></div>
+              <div className="mt-6 h-1 w-16 rounded-full bg-linear-to-r from-sky-400 to-emerald-400"></div>
             </div>
           ))}
         </section>
 
-        <section className="mt-14 rounded-3xl border border-white/10 bg-gradient-to-r from-sky-500/20 to-emerald-500/20 px-8 py-10 text-center text-white">
+        <section className="mt-14 rounded-3xl border border-white/10 bg-linear-to-r from-sky-500/20 to-emerald-500/20 px-8 py-10 text-center text-white">
           <p className="text-sm uppercase tracking-[0.4em] text-white/70">Trusted by modern explorers</p>
           <h2 className="mt-4 text-3xl font-semibold">
             “KiTrav shaved hours off our itinerary planning. Everything we needed was highlighted for us.”
