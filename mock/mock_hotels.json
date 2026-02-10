@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Demo Grand Hotel",
+    "city": "LAS",
+    "address": "123 Demo St",
+    "rating": 4.5,
+    "price": { "amount": 199, "currency": "USD" }
+  },
+  {
+    "name": "Casino Royale",
+    "city": "LAS",
+    "address": "777 Lucky Ave",
+    "rating": 4,
+    "price": { "amount": 149, "currency": "USD" }
+  },
+  {
+    "name": "Bellagio Mock",
+    "city": "LAS",
+    "address": "360 Strip Blvd",
+    "rating": 5,
+    "price": { "amount": 299, "currency": "USD" }
+  }
+]

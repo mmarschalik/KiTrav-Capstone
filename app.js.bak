@@ -1,0 +1,26 @@
+require('dotenv').config();
+const express = require('express');
+const app = express();
+
+// --- middleware (body parsing MUST be here) ---
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// --- routers (require AFTER middleware) ---
+const flightRouter = require('./routes/flights');
+const hotelRouter = require('./routes/hotels');
+const pricingRouter = require('./routes/pricing'); // optional if present
+const bookingsRouter = require('./routes/bookings'); // optional if present
+const tripSummaryRouter = require('./routes/tripSummary');
+
+app.use('/api/flights', flightRouter);
+app.use('/api/hotels', hotelRouter);
+if (pricingRouter) app.use('/api/pricing', pricingRouter);
+if (bookingsRouter) app.use('/api/bookings', bookingsRouter);
+app.use('/api/trip-summary', tripSummaryRouter);
+
+// health
+app.get('/health', (req, res) => res.json({ ok: true, ts: new Date().toISOString() }));
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`KiTrav API listening on port ${PORT}`));
