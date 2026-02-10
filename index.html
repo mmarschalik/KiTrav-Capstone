@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KiTravia Cruise UI</title>
+  <style>
+    :root{
+      --bg:#f6f7fb; --card:#fff; --text:#0f172a; --muted:#64748b;
+      --border:rgba(15,23,42,.12);
+      --shadow:0 10px 25px rgba(15,23,42,.10);
+      --shadow2:0 18px 45px rgba(15,23,42,.18);
+      --blue:#2563eb; --blue2:#1d4ed8;
+      --danger:#ef4444; --danger2:#dc2626;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg)}
+    .topbar{
+      height:56px;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;padding:0 18px;
+      position:sticky;top:0;z-index:10;
+    }
+    .brand{font-weight:800}
+    .topbarRight{display:flex;gap:10px;align-items:center}
+    .select,.input{
+      border:1px solid var(--border);background:#fff;border-radius:10px;
+      padding:7px 10px;font-weight:600;font-size:12px;
+    }
+    .input{font-weight:500;font-size:13px;padding:9px 10px}
+    .btn{
+      border:1px solid var(--border);border-radius:10px;padding:8px 10px;
+      font-weight:800;font-size:12px;cursor:pointer;background:#fff;
+    }
+    .btnSecondary:hover{background:rgba(15,23,42,.04)}
+    .btnPrimary{background:var(--blue);border-color:rgba(37,99,235,.35);color:#fff}
+    .btnPrimary:hover{background:var(--blue2)}
+    .btnDanger{background:var(--danger);border-color:rgba(239,68,68,.35);color:#fff}
+    .btnDanger:hover{background:var(--danger2)}
+
+    .hero{
+      position:relative;height:320px;border-bottom:1px solid var(--border);
+      background-image:url("https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1600&q=60");
+      background-size:cover;background-position:center;
+    }
+    .heroShade{position:absolute;inset:0;background:linear-gradient(to bottom, rgba(0,0,0,.15), rgba(0,0,0,.12))}
+    .heroInner{
+      position:relative;z-index:1;max-width:980px;margin:0 auto;padding:26px 16px;
+      display:grid;gap:14px;justify-items:center;
+    }
+    .heroTitle{
+      margin:0;text-align:center;color:rgba(255,255,255,.95);
+      text-shadow:0 10px 20px rgba(0,0,0,.25);
+      font-size:30px;line-height:1.1;font-weight:900;
+    }
+    .chatShell{
+      width:min(720px,96vw);background:rgba(255,255,255,.92);
+      border:1px solid rgba(255,255,255,.55);
+      box-shadow:var(--shadow);border-radius:16px;padding:12px;
+    }
+    .chipRow{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+    .chip{
+      border:1px solid var(--border);background:#fff;border-radius:999px;
+      padding:7px 10px;font-size:12px;color:#0f172a;cursor:default;
+    }
+    .chatBubbles{margin-top:10px;display:grid;gap:8px}
+    .bubble{
+      max-width:72%;padding:9px 10px;border-radius:14px;font-size:13px;border:1px solid var(--border);
+    }
+    .bubbleUser{margin-left:auto;background:#fff}
+    .bubbleAi{margin-right:auto;background:#fee2e2;border-color:rgba(239,68,68,.25)}
+    .chatComposer{margin-top:10px;display:flex;gap:8px;align-items:center}
+    .sendBtn{
+      width:36px;height:36px;border-radius:999px;border:1px solid var(--border);
+      background:#fff;cursor:not-allowed;opacity:.7;
+    }
+
+    .content{max-width:980px;margin:0 auto;padding:18px 16px 40px}
+    .filterRow{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:10px 0 16px}
+    .filterLeft{display:flex;align-items:center;gap:10px}
+    .filterLabel{font-weight:900;color:var(--muted);font-size:13px}
+    .filterRight{flex:1;display:flex;justify-content:flex-end}
+
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    @media (max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:620px){
+      .grid{grid-template-columns:1fr}
+      .filterRow{flex-direction:column;align-items:stretch}
+      .filterRight{justify-content:stretch}
+    }
+
+    .card{
+      background:var(--card);border:1px solid var(--border);border-radius:14px;
+      overflow:hidden;box-shadow:var(--shadow);display:grid;
+    }
+    .cardImgWrap{position:relative;height:130px;overflow:hidden}
+    .cardImg{width:100%;height:100%;object-fit:cover;display:block}
+    .ratingPill{
+      position:absolute;right:10px;top:10px;background:rgba(255,255,255,.92);
+      border:1px solid var(--border);border-radius:999px;padding:4px 8px;font-size:12px;font-weight:900;
+    }
+    .cardBody{padding:12px}
+    .cardTitleRow{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+    .cardTitle{margin:0;font-size:14px;font-weight:900}
+    .cardPrice{font-weight:900;font-size:13px}
+    .metaList{margin-top:8px;display:grid;gap:6px}
+    .metaItem{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+    .metaDot{width:6px;height:6px;border-radius:999px;background:rgba(15,23,42,.35);display:inline-block}
+    .cardActions{margin-top:12px;display:flex;gap:10px;justify-content:space-between}
+    .bottomRow{display:flex;justify-content:center;margin-top:20px}
+
+    /* Modal */
+    .modalOverlay{
+      position:fixed;inset:0;background:rgba(15,23,42,.55);
+      display:none;place-items:center;padding:18px;z-index:50;
+    }
+    .modalOverlay.open{display:grid}
+    .modal{
+      width:min(520px,96vw);background:#fff;border-radius:16px;
+      border:1px solid rgba(255,255,255,.22);box-shadow:var(--shadow2);overflow:hidden;
+    }
+    .modalHeader{padding:14px 16px 10px;border-bottom:1px solid var(--border)}
+    .modalTitle{margin:0;font-size:16px;font-weight:950}
+    .modalImgWrap{height:170px}
+    .modalImg{width:100%;height:100%;object-fit:cover;display:block}
+    .modalMeta{padding:12px 16px;display:grid;gap:6px}
+    .modalMetaRow{font-size:12px;color:var(--muted)}
+    .modalSection{padding:0 16px 12px}
+    .modalSectionTitle{margin:10px 0 6px;font-size:13px;font-weight:950}
+    .modalText{margin:0;color:#334155;font-size:12.5px;line-height:1.45}
+    .modalList{margin:0;padding-left:16px;color:#334155;font-size:12.5px}
+    .amenityRow{display:flex;flex-wrap:wrap;gap:8px}
+    .amenityChip{
+      border:1px solid var(--border);background:rgba(37,99,235,.06);color:#1d4ed8;
+      font-size:12px;padding:6px 8px;border-radius:999px;font-weight:900;
+    }
+    .modalActions{
+      padding:14px 16px 16px;display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">KiTravia</div>
+    <div class="topbarRight">
+      <select class="select" aria-label="Language">
+        <option>English</option>
+        <option>Malay</option>
+        <option>Spanish</option>
+      </select>
+      <button class="btn btnSecondary">Login</button>
+      <button class="btn btnDanger">Share</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="heroShade"></div>
+    <div class="heroInner">
+      <h1 class="heroTitle">Hi, I’m KiTravia I will be your<br/>travel agent.</h1>
+
+      <div class="chatShell" aria-label="AI chat placeholder">
+        <div class="chipRow">
+          <button class="chip">Trip to destination Barcelona</button>
+          <button class="chip">Road Trip, destination LA</button>
+          <button class="chip">Northern Cruise for two</button>
+          <button class="chip">Family vacation of 4 to xyz</button>
+        </div>
+
+        <div class="chatBubbles">
+          <div class="bubble bubbleUser">
+            I would like to go to the Caribbean where it departs on the November 17th
+          </div>
+          <div class="bubble bubbleAi">
+            Here are the available cruises to the Caribbean on November 17th
+          </div>
+        </div>
+
+        <div class="chatComposer">
+          <input class="input" placeholder="voice mode" disabled />
+          <button class="sendBtn" disabled aria-label="Send (disabled)">➤</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="content">
+    <div class="filterRow">
+      <div class="filterLeft">
+        <span class="filterLabel">Filter</span>
+        <select id="regionSelect" class="select"></select>
+      </div>
+
+      <div class="filterRight">
+        <input id="searchInput" class="input" placeholder="Search destination / cruise name..." />
+      </div>
+    </div>
+
+    <div id="grid" class="grid"></div>
+
+    <div class="bottomRow">
+      <button class="btn btnSecondary" id="viewMoreBtn">View More</button>
+    </div>
+  </main>
+
+  <div id="modalOverlay" class="modalOverlay" role="dialog" aria-modal="true">
+    <div class="modal" id="modal" tabindex="-1">
+      <div class="modalHeader">
+        <h2 class="modalTitle" id="modalTitle"></h2>
+      </div>
+      <div class="modalImgWrap">
+        <img class="modalImg" id="modalImg" alt="Cruise image"/>
+      </div>
+      <div class="modalMeta">
+        <div class="modalMetaRow" id="modalRegion"></div>
+        <div class="modalMetaRow" id="modalDates"></div>
+        <div class="modalMetaRow" id="modalGuests"></div>
+      </div>
+      <div class="modalSection">
+        <h3 class="modalSectionTitle">Description</h3>
+        <p class="modalText" id="modalDesc"></p>
+      </div>
+      <div class="modalSection">
+        <h3 class="modalSectionTitle">Highlights</h3>
+        <ul class="modalList" id="modalHighlights"></ul>
+      </div>
+      <div class="modalSection">
+        <h3 class="modalSectionTitle">Amenities Included</h3>
+        <div class="amenityRow" id="modalAmenities"></div>
+      </div>
+      <div class="modalActions">
+        <button class="btn btnSecondary" id="closeBtn">Close</button>
+        <button class="btn btnPrimary" id="bookBtn">Book Now</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Mock data (replace later with API)
+    const cruises = [
+      {
+        id: "ecc-explorer",
+        name: "Eastern Caribbean Explorer",
+        region: "Eastern Caribbean",
+        rating: 4.9,
+        price: 635,
+        nights: 7,
+        departs: "Nov 17, 2025",
+        maxGuests: 3000,
+        image: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=60",
+        description: "Explore the Eastern Caribbean’s most beautiful islands. Visit St. Thomas, St. Maarten, and Puerto Rico with pristine beaches and vibrant culture.",
+        highlights: ["Shore excursions & beach hopping","Always-on board support","Kid-friendly activities","Evening entertainment","All meals and snacks included"],
+        amenities: ["Meals","Wi-Fi","Fitness Center","Entertainment"]
+      },
+      {
+        id: "wcc-adventure",
+        name: "Western Caribbean Adventure",
+        region: "Western Caribbean",
+        rating: 4.9,
+        price: 673,
+        nights: 10,
+        departs: "Nov 17, 2025",
+        maxGuests: 2500,
+        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=60",
+        description: "A longer itinerary across the Western Caribbean with a mix of relaxation, culture, and snorkeling hotspots.",
+        highlights: ["Longer itinerary","Great for groups","Water activities","Night shows"],
+        amenities: ["Meals","Wi-Fi","Pools","Shows"]
+      },
+      {
+        id: "scc-luxury",
+        name: "Southern Caribbean Luxury",
+        region: "Southern Caribbean",
+        rating: 4.9,
+        price: 703,
+        nights: 8,
+        departs: "Nov 17, 2025",
+        maxGuests: 3300,
+        image: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=60",
+        description: "Premium Southern Caribbean route with warm waters, quieter ports, and a more luxury-focused onboard vibe.",
+        highlights: ["Luxury cabins available","Curated dining","Relaxed pace"],
+        amenities: ["Meals","Spa","Wi-Fi","Entertainment"]
+      },
+      { id:"ecc-explorer-2", name:"Eastern Caribbean Explorer", region:"Eastern Caribbean", rating:4.9, price:655, nights:7, departs:"Nov 17, 2025", maxGuests:3000, image:"https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=60", description:"Same itinerary, different cabin blocks and pricing—useful for testing the UI layout.", highlights:["Beach days","Island tours","Buffet + dining rooms"], amenities:["Meals","Wi-Fi"] },
+      { id:"wcc-adventure-2", name:"Western Caribbean Adventure", region:"Western Caribbean", rating:4.9, price:737, nights:10, departs:"Nov 17, 2025", maxGuests:2500, image:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=60", description:"Second mock listing for grid density—swap with your real API results later.", highlights:["More ports","More sea days","Family-friendly"], amenities:["Meals","Pools"] },
+      { id:"scc-luxury-2", name:"Southern Caribbean Luxury", region:"Southern Caribbean", rating:4.9, price:735, nights:8, departs:"Nov 17, 2025", maxGuests:3300, image:"https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=60", description:"Second luxury listing to match spacing.", highlights:["Relaxed pace","Upgraded dining"], amenities:["Meals","Spa"] },
+    ];
+
+    const grid = document.getElementById("grid");
+    const regionSelect = document.getElementById("regionSelect");
+    const searchInput = document.getElementById("searchInput");
+
+    const modalOverlay = document.getElementById("modalOverlay");
+    const closeBtn = document.getElementById("closeBtn");
+    const bookBtn = document.getElementById("bookBtn");
+
+    const modalTitle = document.getElementById("modalTitle");
+    const modalImg = document.getElementById("modalImg");
+    const modalRegion = document.getElementById("modalRegion");
+    const modalDates = document.getElementById("modalDates");
+    const modalGuests = document.getElementById("modalGuests");
+    const modalDesc = document.getElementById("modalDesc");
+    const modalHighlights = document.getElementById("modalHighlights");
+    const modalAmenities = document.getElementById("modalAmenities");
+
+    function buildRegions() {
+      const regions = ["All", ...new Set(cruises.map(c => c.region))];
+      regionSelect.innerHTML = regions.map(r => `<option value="${r}">${r}</option>`).join("");
+    }
+
+    function renderCards(list) {
+      grid.innerHTML = list.map(c => `
+        <div class="card">
+          <div class="cardImgWrap">
+            <img class="cardImg" src="${c.image}" alt="${c.name}">
+            <div class="ratingPill">★ ${c.rating.toFixed(1)}</div>
+          </div>
+          <div class="cardBody">
+            <div class="cardTitleRow">
+              <h3 class="cardTitle">${c.name}</h3>
+              <div class="cardPrice">$${c.price}</div>
+            </div>
+
+            <div class="metaList">
+              <div class="metaItem"><span class="metaDot"></span>${c.region}</div>
+              <div class="metaItem"><span class="metaDot"></span>${c.nights} nights, departs ${c.departs}</div>
+              <div class="metaItem"><span class="metaDot"></span>Up to ${c.maxGuests} guests</div>
+            </div>
+
+            <div class="cardActions">
+              <button class="btn btnSecondary" data-view="${c.id}">View Details</button>
+              <button class="btn btnPrimary" data-book="${c.id}">Book Now</button>
+            </div>
+          </div>
+        </div>
+      `).join("");
+
+      // attach events
+      grid.querySelectorAll("[data-view]").forEach(btn => {
+        btn.addEventListener("click", () => openModal(btn.dataset.view));
+      });
+      grid.querySelectorAll("[data-book]").forEach(btn => {
+        btn.addEventListener("click", () => alert("Hook booking later!"));
+      });
+    }
+
+    function filtered() {
+      const r = regionSelect.value;
+      const q = searchInput.value.trim().toLowerCase();
+      return cruises.filter(c => {
+        const matchRegion = (r === "All") || (c.region === r);
+        const matchQuery = !q || c.name.toLowerCase().includes(q) || c.region.toLowerCase().includes(q);
+        return matchRegion && matchQuery;
+      });
+    }
+
+    function openModal(id) {
+      const c = cruises.find(x => x.id === id);
+      if (!c) return;
+
+      modalTitle.textContent = c.name;
+      modalImg.src = c.image;
+      modalImg.alt = c.name;
+
+      modalRegion.textContent = "📍 " + c.region;
+      modalDates.textContent = `🗓️ ${c.nights} nights, departs ${c.departs}`;
+      modalGuests.textContent = `👥 Up to ${c.maxGuests} guests`;
+      modalDesc.textContent = c.description;
+
+      modalHighlights.innerHTML = (c.highlights || []).map(h => `<li>${h}</li>`).join("");
+      modalAmenities.innerHTML = (c.amenities || []).map(a => `<span class="amenityChip">${a}</span>`).join("");
+
+      modalOverlay.classList.add("open");
+    }
+
+    function closeModal() {
+      modalOverlay.classList.remove("open");
+    }
+
+    // events
+    regionSelect.addEventListener("change", () => renderCards(filtered()));
+    searchInput.addEventListener("input", () => renderCards(filtered()));
+
+    modalOverlay.addEventListener("mousedown", (e) => {
+      if (e.target === modalOverlay) closeModal();
+    });
+    closeBtn.addEventListener("click", closeModal);
+    bookBtn.addEventListener("click", () => alert("Hook booking later!"));
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeModal();
+    });
+
+    // init
+    buildRegions();
+    renderCards(filtered());
+  </script>
+</body>
+</html>
