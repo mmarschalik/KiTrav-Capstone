@@ -1,0 +1,9 @@
+The endpoints will look like so:
+
+1. City and airport search using the Amadeus Airport & City Search API. This will allow your user to select their origin and destination.
+
+2. Flight search using the Amadeus Flight Offers Search API. This will fetch a list of the cheapest flights between the origin and destination.
+
+3. Confirm a flight using Amadeus Flight Offers Price API. This will confirm the validity of the fare with the airline before booking.
+
+4. Flight booking using the Amadeus Flight Create Orders API. This will book the confirmed flight and generate a booking reference number.
