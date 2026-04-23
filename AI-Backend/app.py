@@ -11,12 +11,14 @@ ssl._create_default_https_context = lambda: ssl.create_default_context(cafile=ce
 import openai as _openai
 from dotenv import load_dotenv
 from flask import Flask, request
+from flask_cors import CORS
 
 load_dotenv()
 
 from modules.llm_connector import call_llm
 
 app = Flask(__name__)
+CORS(app)
 
 
 def _parse_llm_response(raw_json_str: str):
