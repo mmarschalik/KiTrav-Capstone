@@ -11,8 +11,6 @@ app.use(express.static("public"));
 const PORT = process.env.PORT || 3000;
 const AMADEUS_HOST = "https://test.api.amadeus.com";
 
-let compareList = [];
-
 let tokenCache = {
   access_token: null,
   expires_at: 0,
@@ -22,6 +20,7 @@ async function getAccessToken() {
   const now = Date.now();
 
   if (tokenCache.access_token && now < tokenCache.expires_at) {
+    console.log("Using cached token");
     return tokenCache.access_token;
   }
 
@@ -31,6 +30,10 @@ async function getAccessToken() {
     client_secret: process.env.AMADEUS_CLIENT_SECRET,
   });
 
+  console.log("Requesting token...");
+  console.log("Client ID exists:", !!process.env.AMADEUS_CLIENT_ID);
+  console.log("Client Secret exists:", !!process.env.AMADEUS_CLIENT_SECRET);
+
   const res = await fetch(`${AMADEUS_HOST}/v1/security/oauth2/token`, {
     method: "POST",
     headers: {
@@ -39,12 +42,15 @@ async function getAccessToken() {
     body,
   });
 
+  const text = await res.text();
+  console.log("Token status:", res.status);
+  console.log("Token response:", text);
+
   if (!res.ok) {
-    const text = await res.text();
     throw new Error(`Token error: ${res.status} ${text}`);
   }
 
-  const data = await res.json();
+  const data = JSON.parse(text);
 
   tokenCache.access_token = data.access_token;
   tokenCache.expires_at = Date.now() + (data.expires_in - 30) * 1000;
@@ -88,14 +94,107 @@ app.get("/api/flights", async (req, res) => {
       url.searchParams.set("returnDate", returnDate);
     }
 
+    console.log("Flights request params:", {
+      origin,
+      destination,
+      date,
+      returnDate,
+      adults,
+      max,
+    });
+    console.log("Flights URL:", url.toString());
+
     const apiRes = await fetch(url, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
+    console.log("Flights API status:", apiRes.status);
+
     const json = await apiRes.json();
-    res.status(apiRes.status).json(json);
+    console.log("Flights API response:", JSON.stringify(json, null, 2));
+
+    if (!apiRes.ok) {
+      return res.status(apiRes.status).json(json);
+    }
+
+    res.json(json);
+  } catch (err) {
+    res.status(500).json({
+      error: err.message || "Server error",
+    });
+  }
+});
+
+app.get("/api/hotels", async (req, res) => {
+  try {
+    const {
+      destination,
+      checkIn,
+      checkOut,
+      adults = "1",
+      currency = "USD",
+    } = req.query;
+
+    if (!destination || !checkIn || !checkOut) {
+      return res.status(400).json({
+        error: "destination, checkIn, and checkOut are required",
+      });
+    }
+
+    if (!process.env.SERPAPI_KEY) {
+      return res.status(500).json({
+        error: "SERPAPI_KEY is missing in .env",
+      });
+    }
+
+    const url = new URL("https://serpapi.com/search");
+    url.searchParams.set("engine", "google_hotels");
+    url.searchParams.set("q", destination);
+    url.searchParams.set("check_in_date", checkIn);
+    url.searchParams.set("check_out_date", checkOut);
+    url.searchParams.set("adults", String(adults));
+    url.searchParams.set("currency", currency);
+    url.searchParams.set("gl", "us");
+    url.searchParams.set("hl", "en");
+    url.searchParams.set("api_key", process.env.SERPAPI_KEY);
+
+    console.log("Hotels request params:", {
+      destination,
+      checkIn,
+      checkOut,
+      adults,
+      currency,
+    });
+    console.log("Hotels URL:", url.toString());
+
+    const apiRes = await fetch(url);
+    const json = await apiRes.json();
+
+    console.log("Hotels API status:", apiRes.status);
+    console.log("Hotels API response:", JSON.stringify(json, null, 2));
+
+    if (!apiRes.ok) {
+      return res.status(apiRes.status).json(json);
+    }
+
+    const hotels = (json.properties || []).map((hotel) => ({
+      name: hotel.name || "No hotel name",
+      description: hotel.description || "",
+      price: hotel.rate_per_night?.lowest || "N/A",
+      numericPrice: hotel.rate_per_night?.extracted_lowest || null,
+      rating: hotel.overall_rating || null,
+      reviews: hotel.reviews || null,
+      amenities: hotel.amenities || [],
+      image:
+        hotel.images?.[0]?.thumbnail ||
+        hotel.thumbnail ||
+        "",
+      link: hotel.link || "",
+    }));
+
+    res.json({ hotels });
   } catch (err) {
     res.status(500).json({
       error: err.message || "Server error",
@@ -106,69 +205,3 @@ app.get("/api/flights", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
-
-function getSimpleSummary(offer){
-  const s = summarizeOffer(offer);
-
-  return {
-    route: s.isRT
-      ? `${s.out.from} → ${s.out.to} / ${s.back.from} → ${s.back.to}`
-      : `${s.out.from} → ${s.out.to}`,
-    price: fmtMoney(offer),
-    airline: getCarrier(offer),
-    stops: s.isRT
-      ? `Outbound: ${s.out.stops}, Return: ${s.back.stops}`
-      : `${s.out.stops}`
-  };
-}
-
-function addToCompare(index){
-  const offer = displayedOffers[index];
-  if(!offer) return;
-
-  if(compareList.includes(index)){
-    alert("This flight is already in compare.");
-    return;
-  }
-
-  if(compareList.length >= 2){
-    alert("You can only compare 2 flights at a time.");
-    return;
-  }
-
-  compareList.push(index);
-
-  if(compareList.length === 2){
-    showComparison();
-  } else {
-    alert("First flight added. Choose one more flight to compare.");
-  }
-}
-
-function showComparison(){
-  if(compareList.length < 2){
-    alert("Please choose 2 flights first.");
-    return;
-  }
-
-  const a = getSimpleSummary(displayedOffers[compareList[0]]);
-  const b = getSimpleSummary(displayedOffers[compareList[1]]);
-
-  alert(
-`Flight Comparison
-
-Flight 1
-Route: ${a.route}
-Price: ${a.price}
-Airline: ${a.airline}
-Stops: ${a.stops}
-
-Flight 2
-Route: ${b.route}
-Price: ${b.price}
-Airline: ${b.airline}
-Stops: ${b.stops}`
-  );
-
-  compareList = [];
-}
