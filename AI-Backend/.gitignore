@@ -1,0 +1,21 @@
+# Environment and secrets (do not commit)
+.env
+serviceAccountKey.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# macOS
+.DS_Store
+
+# Claude Code session data
+.claude/
+
+# Playwright MCP logs
+.playwright-mcp/
+
+# Pytest cache
+.pytest_cache/
