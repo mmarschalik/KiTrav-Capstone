@@ -641,6 +641,47 @@
       gap:10px;
       align-items:center;
     }
+
+    .topSwitch{
+  display:flex;
+  justify-content:center;
+  gap:28px;
+  padding:14px 10px 10px;
+  border-bottom:1px solid rgba(15,23,42,.08);
+  margin-bottom:10px;
+}
+
+.switchItem{
+  font-weight:800;
+  font-size:14px;
+  color:#2b4b8e;
+  cursor:pointer;
+  position:relative;
+  padding-bottom:6px;
+  display:flex;
+  gap:6px;
+  align-items:center;
+}
+
+.switchItem:hover{
+  color:#1f5bd8;
+}
+
+.switchItem.active{
+  color:#1f5bd8;
+}
+
+.switchItem.active::after{
+  content:"";
+  position:absolute;
+  bottom:-6px;
+  left:0;
+  width:100%;
+  height:3px;
+  background:#1f5bd8;
+  border-radius:999px;
+}
+
   </style>
 </head>
 <body>
@@ -658,10 +699,6 @@
         <a href="#">FAQs</a>
       </nav>
 
-      <div class="navRight">
-        <a class="btn btnOutline" href="/index.html">Flights</a>
-        <a class="btn btnPrimary" href="/hotel.html">Hotels</a>
-      </div>
     </div>
   </header>
 
@@ -691,6 +728,14 @@
 
     <div class="panelWrap">
       <div class="panel" aria-label="Flight Search Panel">
+        <div class="topSwitch">
+          <div class="switchItem active" data-tab="flights">Flights</div>
+          <div class="switchItem" data-tab="stays" onclick="hotelPage()">Hotel</div>
+          <div class="switchItem" data-tab="cars">Cars</div>
+          <div class="switchItem" data-tab="packages">Packages</div>
+          <div class="switchItem" data-tab="things">Things to do</div>
+          <div class="switchItem" data-tab="cruises">Cruises</div>
+        </div>
         <div class="panelTop">
           <div class="panelLabel">
             Flight Search
@@ -1506,6 +1551,42 @@
     syncTripTypeUI();
     updateCompareBar();
     renderEmpty("Search to see flight offers.");
+
+    const switchItems = document.querySelectorAll(".switchItem");
+const panelLabel = document.querySelector(".panelLabel");
+
+switchItems.forEach(item => {
+  item.addEventListener("click", () => {
+    // remove active
+    switchItems.forEach(i => i.classList.remove("active"));
+    item.classList.add("active");
+
+    const tab = item.dataset.tab;
+
+    if(tab === "flights"){
+      panelLabel.innerHTML = `Flight Search <span class="pill">Powered by Amadeus</span>`;
+    }
+    else if(tab === "stays"){
+      panelLabel.innerHTML = `Hotel Search <span class="pill">Powered by API</span>`;
+    }
+    else if(tab === "cars"){
+      panelLabel.innerHTML = `Car Rental Search`;
+    }
+    else if(tab === "packages"){
+      panelLabel.innerHTML = `Package Deals Search`;
+    }
+    else if(tab === "things"){
+      panelLabel.innerHTML = `Things To Do Search`;
+    }
+    else if(tab === "cruises"){
+      panelLabel.innerHTML = `Cruise Search`;
+    }
+  });
+});
+
+function hotelPage(){
+  window.location.href = "/hotel.html"
+}
   </script>
 </body>
 </html>
