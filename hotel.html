@@ -78,43 +78,6 @@
 
     .navLinks a:hover{ color:#1f5bd8 }
 
-    .navRight{
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-
-    .btn{
-      border:1px solid rgba(43,100,232,.25);
-      background:#fff;
-      padding:10px 14px;
-      font-weight:800;
-      font-size:14px;
-      border-radius:12px;
-      cursor:pointer;
-      color:#1f3b8f;
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    .btnPrimary{
-      background:var(--btnBlue);
-      color:#fff;
-      border-color:rgba(43,100,232,.35);
-      box-shadow:0 10px 22px rgba(43,100,232,.22);
-    }
-
-    .btnPrimary:hover{ background:var(--btnBlueHover) }
-
-    .btnOutline{
-      border-color:rgba(43,100,232,.45);
-      color:var(--navBlue);
-    }
-
-    .btnOutline:hover{ background:rgba(43,100,232,.06) }
-
     @media (max-width: 860px){
       .navLinks{ display:none; }
       .logo{ height:48px; }
@@ -248,7 +211,7 @@
 
     .formRow{
       display:grid;
-      grid-template-columns: 1.2fr 1fr 1fr 0.8fr auto;
+      grid-template-columns: 1.4fr 1fr 1fr 0.8fr auto;
       gap:12px;
       align-items:stretch;
     }
@@ -491,6 +454,47 @@
       gap:10px;
       justify-content:space-between;
     }
+
+    .topSwitch{
+      display:flex;
+      justify-content:center;
+      gap:28px;
+      padding:10px 10px 16px;
+      border-bottom:1px solid rgba(15,23,42,.08);
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+
+    .switchItem{
+      font-weight:800;
+      font-size:14px;
+      color:#2b4b8e;
+      cursor:pointer;
+      position:relative;
+      padding-bottom:6px;
+      display:flex;
+      gap:6px;
+      align-items:center;
+    }
+
+    .switchItem:hover{
+      color:#1f5bd8;
+    }
+
+    .switchItem.active{
+      color:#1f5bd8;
+    }
+
+    .switchItem.active::after{
+      content:"";
+      position:absolute;
+      bottom:-6px;
+      left:0;
+      width:100%;
+      height:3px;
+      background:#1f5bd8;
+      border-radius:999px;
+    }
   </style>
 </head>
 <body>
@@ -507,11 +511,6 @@
         <a href="#">Blog</a>
         <a href="#">FAQs</a>
       </nav>
-
-      <div class="navRight">
-        <a class="btn btnOutline" href="/index.html">Flights</a>
-        <a class="btn btnPrimary" href="/hotels.html">Hotels</a>
-      </div>
     </div>
   </header>
 
@@ -531,31 +530,40 @@
 
     <div class="panelWrap">
       <div class="panel" aria-label="Hotel Search Panel">
+        <div class="topSwitch">
+          <div class="switchItem" data-tab="flights">Flights</div>
+          <div class="switchItem active" data-tab="stays">Hotel</div>
+          <div class="switchItem" data-tab="cars">Cars</div>
+          <div class="switchItem" data-tab="packages">Packages</div>
+          <div class="switchItem" data-tab="things">Things to do</div>
+          <div class="switchItem" data-tab="cruises">Cruises</div>
+        </div>
+
         <div class="panelTop">
           <div class="panelLabel">
             Hotel Search
-            <span class="pill">Powered by Amadeus</span>
+            <span class="pill">Powered by SerpApi</span>
           </div>
           <div class="helper">
-            <span>Tip: Try <span class="mono">KUL</span>, <span class="mono">LON</span>, or <span class="mono">PAR</span></span>
+            <span>Tip: Try <span class="mono">Kuala Lumpur</span>, <span class="mono">Tokyo</span>, or <span class="mono">Paris</span></span>
             <button class="resetBtn" id="resetBtn" type="button">Reset</button>
           </div>
         </div>
 
         <div class="formRow">
-        <input id="cityCodeInput" class="input" placeholder="City Code (KUL)" maxlength="3" />
-        <input id="checkInInput" class="input" type="date" />
-        <input id="checkOutInput" class="input" type="date" />
-        <input id="guestsInput" class="input" type="number" min="1" value="1" />
-        <button class="searchBtn" id="searchBtn">Search</button>
+          <input id="destinationInput" class="input" placeholder="Destination (Kuala Lumpur)" />
+          <input id="checkInInput" class="input" type="date" />
+          <input id="checkOutInput" class="input" type="date" />
+          <input id="guestsInput" class="input" type="number" min="1" value="1" />
+          <button class="searchBtn" id="searchBtn">Search</button>
         </div>
 
         <div class="formRow" style="grid-template-columns: 1.5fr 1fr; margin-top:12px;">
-        <input id="nameFilterInput" class="input" placeholder="Filter by hotel name" />
-        <select id="sortFilter" class="input">
+          <input id="nameFilterInput" class="input" placeholder="Filter by hotel name" />
+          <select id="sortFilter" class="input">
             <option value="az">Sort: A → Z</option>
             <option value="za">Sort: Z → A</option>
-        </select>
+          </select>
         </div>
       </div>
     </div>
@@ -569,36 +577,39 @@
     <div class="modal">
       <div class="modalHeader">
         <h2 class="modalTitle" id="modalTitle">Hotel Details</h2>
-        <button class="btn btnOutline" id="closeBtn" type="button">Close</button>
+        <button class="btn" id="closeBtn" type="button">Close</button>
       </div>
 
       <div class="modalMeta">
         <div id="modalName"></div>
-        <div id="modalCity"></div>
-        <div id="modalCountry"></div>
-        <div id="modalAddress"></div>
+        <div id="modalPrice"></div>
+        <div id="modalRating"></div>
+        <div id="modalReviews"></div>
         <div id="modalDates"></div>
         <div id="modalGuests"></div>
       </div>
 
       <div class="modalSection">
         <h3 class="modalSectionTitle">About this hotel</h3>
-        <div style="color:#32435f; font-size:13px; font-weight:600;">
-          This is a simple hotel result view from the Amadeus hotel-by-city search.
-        </div>
+        <div id="modalDescription" style="color:#32435f; font-size:13px; font-weight:600;"></div>
+      </div>
+
+      <div class="modalSection">
+        <h3 class="modalSectionTitle">Amenities</h3>
+        <div id="modalAmenities" style="color:#32435f; font-size:13px; font-weight:600;"></div>
       </div>
 
       <div class="modalActions">
-        <button class="btn btnOutline" id="closeBtnBottom" type="button">Close</button>
+        <button class="btn" id="closeBtnBottom" type="button">Close</button>
         <button class="btn btnPrimary" id="selectBtn" type="button">Select</button>
       </div>
     </div>
   </div>
 
   <script>
-    const HOTEL_BOOKMARK_KEY = "kitravia_hotel_bookmarks_v1";
+    const HOTEL_BOOKMARK_KEY = "kitravia_hotel_bookmarks_v2";
 
-    const cityCodeInput = document.getElementById("cityCodeInput");
+    const destinationInput = document.getElementById("destinationInput");
     const checkInInput = document.getElementById("checkInInput");
     const checkOutInput = document.getElementById("checkOutInput");
     const guestsInput = document.getElementById("guestsInput");
@@ -606,6 +617,7 @@
     const resetBtn = document.getElementById("resetBtn");
     const nameFilterInput = document.getElementById("nameFilterInput");
     const sortFilter = document.getElementById("sortFilter");
+    const grid = document.getElementById("grid");
 
     const modalOverlay = document.getElementById("modalOverlay");
     const closeBtn = document.getElementById("closeBtn");
@@ -613,19 +625,21 @@
     const selectBtn = document.getElementById("selectBtn");
     const modalTitle = document.getElementById("modalTitle");
     const modalName = document.getElementById("modalName");
-    const modalCity = document.getElementById("modalCity");
-    const modalCountry = document.getElementById("modalCountry");
-    const modalAddress = document.getElementById("modalAddress");
+    const modalPrice = document.getElementById("modalPrice");
+    const modalRating = document.getElementById("modalRating");
+    const modalReviews = document.getElementById("modalReviews");
     const modalDates = document.getElementById("modalDates");
     const modalGuests = document.getElementById("modalGuests");
+    const modalDescription = document.getElementById("modalDescription");
+    const modalAmenities = document.getElementById("modalAmenities");
 
     let displayedHotels = [];
     let rawHotels = [];
 
     function toYMD(dateObj){
       const yyyy = dateObj.getFullYear();
-      const mm = String(dateObj.getMonth()+1).padStart(2,"0");
-      const dd = String(dateObj.getDate()).padStart(2,"0");
+      const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const dd = String(dateObj.getDate()).padStart(2, "0");
       return `${yyyy}-${mm}-${dd}`;
     }
 
@@ -665,7 +679,7 @@
     }
 
     function makeHotelBookmarkId(hotel){
-      return `${hotel.hotelId}-${hotel.name}-${hotel.cityCode}`;
+      return `${hotel.name}-${hotel.price}-${hotel.rating}`;
     }
 
     function isBookmarked(id){
@@ -694,30 +708,39 @@
       saveBookmarks(list);
       return { saved:true };
     }
-    
+
     function applyFilters(){
-        let list = [...rawHotels];
+      let list = [...rawHotels];
 
-        const nameText = nameFilterInput.value.trim().toLowerCase();
-        if (nameText){
-            list = list.filter(hotel =>
-            (hotel.name || "").toLowerCase().includes(nameText)
-            );
-        }
+      const nameText = nameFilterInput.value.trim().toLowerCase();
+      if (nameText){
+        list = list.filter(hotel =>
+          (hotel.name || "").toLowerCase().includes(nameText)
+        );
+      }
 
-        if (sortFilter.value === "az"){
-            list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-        } else if (sortFilter.value === "za"){
-            list.sort((a, b) => (b.name || "").localeCompare(a.name || ""));
-        }
+      if (sortFilter.value === "az"){
+        list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+      } else if (sortFilter.value === "za"){
+        list.sort((a, b) => (b.name || "").localeCompare(a.name || ""));
+      }
 
-        displayedHotels = list;
-        renderHotels();
+      displayedHotels = list;
+      renderHotels();
+    }
+
+    function formatAmenities(amenities){
+      if (!amenities || !amenities.length) return "No amenities listed";
+      return amenities.slice(0, 6).join(", ");
+    }
+
+    function getFallbackImage(){
+      return "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600&q=60";
     }
 
     function renderHotels(){
       if (!displayedHotels.length){
-        renderEmpty("Try another city code.");
+        renderEmpty("Try another destination.");
         return;
       }
 
@@ -729,18 +752,20 @@
           <div class="card">
             <div class="cardImgWrap">
               <img class="cardImg"
-                src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600&q=60"
-                alt="Hotel">
+                src="${hotel.image || getFallbackImage()}"
+                alt="${hotel.name || "Hotel"}"
+                onerror="this.src='${getFallbackImage()}'">
               <div class="badge">Hotel #${idx + 1}</div>
             </div>
 
             <div class="cardBody">
               <h3 class="route">${hotel.name || "No hotel name"}</h3>
-              <div class="subRoute">${hotel.cityCode || "N/A"} • ${hotel.countryCode || "N/A"}</div>
+              <div class="subRoute">${hotel.price || "N/A"} • Rating: ${hotel.rating || "N/A"}</div>
 
               <div class="meta">
-                <div class="metaRow"><span class="dot"></span><span>Address: ${hotel.address || "No address available"}</span></div>
-                <div class="metaRow"><span class="dot"></span><span>Hotel ID: ${hotel.hotelId || "N/A"}</span></div>
+                <div class="metaRow"><span class="dot"></span><span>${hotel.description || "No description available"}</span></div>
+                <div class="metaRow"><span class="dot"></span><span>Reviews: ${hotel.reviews || "N/A"}</span></div>
+                <div class="metaRow"><span class="dot"></span><span>Amenities: ${formatAmenities(hotel.amenities)}</span></div>
                 <div class="metaRow"><span class="dot"></span><span>Guests: ${guestsInput.value || 1}</span></div>
               </div>
 
@@ -761,7 +786,7 @@
       grid.querySelectorAll("[data-bookmark]").forEach(btn => {
         btn.addEventListener("click", () => {
           const hotel = displayedHotels[Number(btn.dataset.bookmark)];
-          if(!hotel) return;
+          if (!hotel) return;
           const result = toggleBookmark(hotel);
           btn.textContent = result.saved ? "Bookmarked ✓" : "Bookmark";
         });
@@ -769,7 +794,8 @@
 
       grid.querySelectorAll("[data-select]").forEach(btn => {
         btn.addEventListener("click", () => {
-          alert(`Selected Hotel #${Number(btn.dataset.select) + 1} ✅`);
+          const hotel = displayedHotels[Number(btn.dataset.select)];
+          alert(`Selected ${hotel?.name || "hotel"} ✅`);
         });
       });
     }
@@ -780,11 +806,13 @@
 
       modalTitle.textContent = `Hotel #${index + 1}`;
       modalName.textContent = `🏨 Name: ${hotel.name || "No hotel name"}`;
-      modalCity.textContent = `📍 City: ${hotel.cityCode || "N/A"}`;
-      modalCountry.textContent = `🌍 Country: ${hotel.countryCode || "N/A"}`;
-      modalAddress.textContent = `🧭 Address: ${hotel.address || "No address available"}`;
+      modalPrice.textContent = `💲 Price: ${hotel.price || "N/A"}`;
+      modalRating.textContent = `⭐ Rating: ${hotel.rating || "N/A"}`;
+      modalReviews.textContent = `📝 Reviews: ${hotel.reviews || "N/A"}`;
       modalDates.textContent = `🗓️ Stay: ${checkInInput.value || "N/A"} → ${checkOutInput.value || "N/A"}`;
       modalGuests.textContent = `👤 Guests: ${guestsInput.value || 1}`;
+      modalDescription.textContent = hotel.description || "No description available.";
+      modalAmenities.textContent = formatAmenities(hotel.amenities);
 
       selectBtn.onclick = () => {
         alert(`Selected ${hotel.name || "hotel"} ✅`);
@@ -798,17 +826,13 @@
     }
 
     async function searchHotels(){
-      const cityCode = cityCodeInput.value.trim().toUpperCase();
+      const destination = destinationInput.value.trim();
       const checkIn = checkInInput.value;
       const checkOut = checkOutInput.value;
+      const adults = guestsInput.value || "1";
 
-      if (!cityCode){
-        renderEmpty("Please enter a city code.");
-        return;
-      }
-
-      if (cityCode.length !== 3){
-        renderEmpty("Please enter a valid 3-letter city code like KUL, PAR, or LON.");
+      if (!destination){
+        renderEmpty("Please enter a destination.");
         return;
       }
 
@@ -831,7 +855,10 @@
 
       try{
         const url = new URL("http://localhost:3000/api/hotels");
-        url.searchParams.set("cityCode", cityCode);
+        url.searchParams.set("destination", destination);
+        url.searchParams.set("checkIn", checkIn);
+        url.searchParams.set("checkOut", checkOut);
+        url.searchParams.set("adults", adults);
 
         const res = await fetch(url);
         const json = await res.json();
@@ -849,14 +876,14 @@
     }
 
     function resetForm(){
-        cityCodeInput.value = "";
-        guestsInput.value = 1;
-        nameFilterInput.value = "";
-        sortFilter.value = "az";
-        setDefaultDates();
-        rawHotels = [];
-        displayedHotels = [];
-        renderEmpty("Search to see hotel results.");
+      destinationInput.value = "";
+      guestsInput.value = 1;
+      nameFilterInput.value = "";
+      sortFilter.value = "az";
+      setDefaultDates();
+      rawHotels = [];
+      displayedHotels = [];
+      renderEmpty("Search to see hotel results.");
     }
 
     resetBtn.addEventListener("click", resetForm);
@@ -864,28 +891,44 @@
     nameFilterInput.addEventListener("input", applyFilters);
     sortFilter.addEventListener("change", applyFilters);
 
-    [cityCodeInput, checkInInput, checkOutInput, guestsInput].forEach(el => {
+    [destinationInput, checkInInput, checkOutInput, guestsInput].forEach(el => {
       el.addEventListener("keydown", (e) => {
         if (e.key === "Enter") searchHotels();
       });
     });
 
     modalOverlay.addEventListener("mousedown", (e) => {
-      if(e.target === modalOverlay) closeModal();
+      if (e.target === modalOverlay) closeModal();
     });
 
     closeBtn.addEventListener("click", closeModal);
     closeBtnBottom.addEventListener("click", closeModal);
 
     window.addEventListener("keydown", (e) => {
-      if(e.key === "Escape"){
+      if (e.key === "Escape"){
         closeModal();
       }
     });
 
-    cityCodeInput.value = "KUL";
+    destinationInput.value = "Kuala Lumpur";
     setDefaultDates();
     renderEmpty("Search to see hotel results.");
+
+    const switchItems = document.querySelectorAll(".switchItem");
+
+    switchItems.forEach(item => {
+      item.addEventListener("click", () => {
+        const tab = item.dataset.tab;
+
+        if (tab === "flights") {
+          window.location.href = "/index.html";
+          return;
+        }
+
+        switchItems.forEach(i => i.classList.remove("active"));
+        item.classList.add("active");
+      });
+    });
   </script>
 </body>
 </html>
