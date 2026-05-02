@@ -1,0 +1,70 @@
+import '/flutter_flow/flutter_flow_util.dart';
+import '/index.dart';
+import 'createaccount_widget.dart' show CreateaccountWidget;
+import 'package:flutter/material.dart';
+
+class CreateaccountModel extends FlutterFlowModel<CreateaccountWidget> {
+  ///  State fields for stateful widgets in this page.
+
+  // State field(s) for TabBar widget.
+  TabController? tabBarController;
+  int get tabBarCurrentIndex =>
+      tabBarController != null ? tabBarController!.index : 0;
+  int get tabBarPreviousIndex =>
+      tabBarController != null ? tabBarController!.previousIndex : 0;
+
+  // State field(s) for emailAddress_Create widget.
+  FocusNode? emailAddressCreateFocusNode;
+  TextEditingController? emailAddressCreateTextController;
+  String? Function(BuildContext, String?)?
+      emailAddressCreateTextControllerValidator;
+  // State field(s) for password_Create widget.
+  FocusNode? passwordCreateFocusNode;
+  TextEditingController? passwordCreateTextController;
+  late bool passwordCreateVisibility;
+  String? Function(BuildContext, String?)?
+      passwordCreateTextControllerValidator;
+  // State field(s) for confirmpassword_Create widget.
+  FocusNode? confirmpasswordCreateFocusNode;
+  TextEditingController? confirmpasswordCreateTextController;
+  late bool confirmpasswordCreateVisibility;
+  String? Function(BuildContext, String?)?
+      confirmpasswordCreateTextControllerValidator;
+  // State field(s) for Checkbox widget.
+  bool? checkboxValue;
+  // State field(s) for emailAddress widget.
+  FocusNode? emailAddressFocusNode;
+  TextEditingController? emailAddressTextController;
+  String? Function(BuildContext, String?)? emailAddressTextControllerValidator;
+  // State field(s) for password widget.
+  FocusNode? passwordFocusNode;
+  TextEditingController? passwordTextController;
+  late bool passwordVisibility;
+  String? Function(BuildContext, String?)? passwordTextControllerValidator;
+
+  @override
+  void initState(BuildContext context) {
+    passwordCreateVisibility = false;
+    confirmpasswordCreateVisibility = false;
+    passwordVisibility = false;
+  }
+
+  @override
+  void dispose() {
+    tabBarController?.dispose();
+    emailAddressCreateFocusNode?.dispose();
+    emailAddressCreateTextController?.dispose();
+
+    passwordCreateFocusNode?.dispose();
+    passwordCreateTextController?.dispose();
+
+    confirmpasswordCreateFocusNode?.dispose();
+    confirmpasswordCreateTextController?.dispose();
+
+    emailAddressFocusNode?.dispose();
+    emailAddressTextController?.dispose();
+
+    passwordFocusNode?.dispose();
+    passwordTextController?.dispose();
+  }
+}
